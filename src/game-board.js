@@ -48,7 +48,7 @@ class GameBoard extends Component {
   subscribe(updateCommentsQuery) {
     const SUBSCRIPTION_QUERY = gql`
         subscription OnlyNeededWithPassingVars {
-            gameUpdated {
+            gameJoined {
                 status
                 cells {
                     id
