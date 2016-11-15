@@ -18,8 +18,8 @@ class Grid extends Component {
       return <div>Loading...</div>;
     } else {
       return (
-        <div>
-          <div style={{display: 'flex', flex: '1 1 50px'}}>
+        <div style={{display:'flex', flexDirection:'column'}}>
+          <div style={{display: 'flex'}}>
             <Cell cell={this.props.specificGameBoard.cells[0]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
             <Cell cell={this.props.specificGameBoard.cells[1]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
             <Cell cell={this.props.specificGameBoard.cells[2]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
