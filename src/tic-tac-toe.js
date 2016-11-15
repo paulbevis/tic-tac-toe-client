@@ -72,56 +72,5 @@ class TicTacToe extends Component {
         </div>)
     }
   }
-  subscribe(updateCommentsQuery) {
-    const SUBSCRIPTION_QUERY = gql`
-        subscription newGameCreated {
-            newGameCreated {
-                id
-            }
-        }`;
-
-    this.subscriptionObserver = this.props.client.subscribe({
-      query: SUBSCRIPTION_QUERY
-    }).subscribe({
-      next(data) {
-        updateCommentsQuery(() => {
-          return {firstAvailableGameBoard: {id: data.newGameCreated.id}};
-        });
-      },
-      error(err) {
-        console.error('err', err);
-      },
-    });
-  }
-
-
-  componentDidMount() {
-    if (this.props.loading === false) {
-      this.subscribe(this.props.updateCommentsQuery);
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (this.subscriptionObserver) {
-      this.subscriptionObserver.unsubscribe();
-    }
-    this.subscribe(nextProps.updateCommentsQuery);
-  }
-
-  componentWillUnmount() {
-    if (this.subscriptionObserver) {
-      this.subscriptionObserver.unsubscribe();
-    }
-  }
 }
 
-export default withApollo(graphql(gql`
-    query firstAvailableGameBoard {
-        firstAvailableGameBoard {
-            id
-        }
-    }`, {
-  props({data: {loading, firstAvailableGameBoard, updateQuery}}) {
-    return {loading, firstAvailableGameBoard, updateCommentsQuery: updateQuery};
-  }
-})(TicTacToe));
