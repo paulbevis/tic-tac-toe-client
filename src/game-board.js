@@ -2,23 +2,31 @@ import React, {Component} from 'react';
 import gql from 'graphql-tag';
 import {graphql, withApollo} from 'react-apollo';
 
-import {find, propEq} from 'ramda'
+import {find, propEq, reject} from 'ramda'
 
 import Grid from './grid'
 
 class GameBoard extends Component {
 
-  getPlayerName(id) {
+  getHomePlayerName(id) {
     if (this.props.specificGameBoard) {
       if (id) {
         let myPlayer = find(propEq('id', id))(this.props.specificGameBoard.players);
-        return 'Player 1(' + myPlayer.value + ')'
+        let value = ' (' + myPlayer.value + ')'
+        return myPlayer.name ? myPlayer.name + value : 'Player 1' + value
       } else {
-        if (this.props.specificGameBoard.players.length === 2) {
-          return 'Player 2'
-        } else {
-          return 'Waiting for a player...'
-        }
+        return 'Waiting for a player...'
+      }
+    }
+  }
+
+  getAwayPlayerName(id) {
+    if (this.props.specificGameBoard) {
+      if (id && this.props.specificGameBoard.players.length === 2) {
+        let otherPlayer = reject(propEq('id', id))(this.props.specificGameBoard.players);
+        return otherPlayer.name ? otherPlayer.name : 'Player 2';
+      } else {
+        return 'Waiting for a player...'
       }
     }
   }
@@ -35,10 +43,12 @@ class GameBoard extends Component {
       return <div>Loading...</div>;
     } else {
       return (
-        <div style={{display: 'flex'}}>
-          <div>{this.getPlayerName(this.props.yourPlayerId)}</div>
-          {this.displayBoard()}
-          <div>{this.getPlayerName()}</div>
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+          <div style={{display: 'flex', justifyContent: 'center'}}>
+            <div style={{display: 'flex', margin: '10px'}}>{this.getHomePlayerName(this.props.yourPlayerId)}</div>
+            {this.displayBoard()}
+            <div style={{display: 'flex', margin: '10px'}}>{this.getAwayPlayerName(this.props.yourPlayerId)}</div>
+          </div>
         </div>
       );
     }
@@ -58,6 +68,7 @@ class GameBoard extends Component {
                     id
                     status
                     value
+                    name
                 }
             }
         }`;
@@ -67,8 +78,8 @@ class GameBoard extends Component {
     }).subscribe({
       next(data) {
         updateCommentsQuery((previousResult) => {
-          previousResult.specificGameBoard.players = data.gameUpdated.players;
-          previousResult.specificGameBoard.status = data.gameUpdated.status;
+          previousResult.specificGameBoard.players = data.gameJoined.players;
+          previousResult.specificGameBoard.status = data.gameJoined.status;
           return previousResult
         });
       },
@@ -77,7 +88,6 @@ class GameBoard extends Component {
       },
     });
   }
-
 
   componentDidMount() {
     if (this.props.loading === false) {
@@ -112,6 +122,7 @@ export default withApollo(graphql(gql`
                 id
                 status
                 value
+                name
             }
         }
     }`, {
