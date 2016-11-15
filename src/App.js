@@ -20,9 +20,7 @@ class App extends Component {
     );
 
     this.client = new ApolloClient({
-      // networkInterface,
       networkInterface: networkInterfaceWithSubscriptions,
-      dataIdFromObject: r => r.id,
     });
   }
 
