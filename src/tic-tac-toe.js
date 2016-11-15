@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
-import gql from 'graphql-tag';
-import {graphql, withApollo} from 'react-apollo';
-
-import CreateGame from './create-game'
-import RegisterPlayer from './register-player'
+import StartGame from './start-game'
 import GameBoard from './game-board'
+import PlayerName from './player-name'
+
 /*eslint no-extend-native: ["error", { "exceptions": ["String"] }]*/
 String.prototype.hashCode = function() {
   var hash = 0, i, chr, len;
@@ -21,28 +19,18 @@ class TicTacToe extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {registerUserNow: false, newGameCreated: false};
-    this.onCreated = this.onCreated.bind(this);
+    this.state = {registerUserNow: false, newGameCreated: false, playerName: ''};
+    this.onJoined = this.onJoined.bind(this);
     this.onPlayerRegistered = this.onPlayerRegistered.bind(this);
-    this.joinGame = this.joinGame.bind(this);
+    this.onPlayerNameUpdate = this.onPlayerNameUpdate.bind(this);
   }
 
-  joinGame() {
-    this.setState({registerUserNow: true, gameBoardId: this.props.firstAvailableGameBoard.id})
-  }
-
-  showJoinButton() {
-    if (this.props.firstAvailableGameBoard && !this.state.newGameCreated) {
-      return <button onClick={this.joinGame}>Join Game</button>
-    }
-  }
-
-  onCreated(gameBoardId) {
-    this.setState({gameBoardId: gameBoardId, registerUserNow: true, newGameCreated: true})
+  onJoined(gameBoardId) {
+    this.setState({gameBoardId: gameBoardId, registerUserNow: true, newGameCreated: true, playerName: this.state.playerName})
   }
 
   displayGameBoard() {
-    if (this.state.playerRegistered) {
+    if (this.state.gameBoardId >= 0) {
       return <GameBoard yourPlayerId={this.state.playerId} gameBoardId={this.state.gameBoardId}/>
     }
   }
@@ -51,10 +39,13 @@ class TicTacToe extends Component {
     this.setState({playerRegistered: true, playerId: playerId});
   }
 
+  onPlayerNameUpdate(event) {
+    this.setState({playerName: event.target.value, playerId: '' + event.target.value.hashCode()});
+  }
 
-  registerUserWithGame() {
-    if (this.state.registerUserNow && (this.state.gameBoardId || this.state.gameBoardId >= 0)) {
-      return <RegisterPlayer gameBoardId={this.state.gameBoardId} onRegistration={this.onPlayerRegistered}/>
+  displayStartGame() {
+    if (this.state.playerName.length !== 0) {
+      return <StartGame onJoined={this.onJoined} playerName={this.state.playerName} playerId={this.state.playerId}/>
     }
   }
 
@@ -64,13 +55,13 @@ class TicTacToe extends Component {
     } else {
       return (
         <div>
-          <h1>Lets playe Tic Tac Toe</h1>
-          <CreateGame onCreated={this.onCreated}/>
-          {this.showJoinButton()}
-          {this.registerUserWithGame()}
+          <h1>Tic Tac Toe</h1>
+          <PlayerName onChange={this.onPlayerNameUpdate}/>
+          {this.displayStartGame()}
           {this.displayGameBoard()}
         </div>)
     }
   }
 }
 
+export default TicTacToe;
