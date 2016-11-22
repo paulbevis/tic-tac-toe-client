@@ -7,32 +7,37 @@ import Cell from './cell'
 
 class Grid extends Component {
 
-  getPlayerValue(id) {
+  constructor(props) {
+    super(props);
+    this.state = {'clickable': false};
+  }
+  getPlayer(id) {
     if (id) {
-      return find(propEq('id', id))(this.props.specificGameBoard.players).value
+      return find(propEq('id', id))(this.props.specificGameBoard.players)
     }
   }
 
   render() {
+    console.log('grid: state: ',this.state, this.props) ;
     if (this.props.loading) {
       return <div>Loading...</div>;
     } else {
       return (
-        <div style={{display:'flex', flexDirection:'column'}}>
+        <div style={{display: 'flex', flexDirection: 'column', width: '32%', alignItems: 'center'}}>
           <div style={{display: 'flex'}}>
-            <Cell cell={this.props.specificGameBoard.cells[0]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
-            <Cell cell={this.props.specificGameBoard.cells[1]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
-            <Cell cell={this.props.specificGameBoard.cells[2]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[0]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[1]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[2]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
           </div>
           <div style={{display: 'flex'}}>
-            <Cell cell={this.props.specificGameBoard.cells[3]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
-            <Cell cell={this.props.specificGameBoard.cells[4]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
-            <Cell cell={this.props.specificGameBoard.cells[5]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[3]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[4]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[5]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
           </div>
           <div style={{display: 'flex'}}>
-            <Cell cell={this.props.specificGameBoard.cells[6]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
-            <Cell cell={this.props.specificGameBoard.cells[7]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
-            <Cell cell={this.props.specificGameBoard.cells[8]} playerValue={this.getPlayerValue(this.props.yourPlayerId)} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[6]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[7]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
+            <Cell cell={this.props.specificGameBoard.cells[8]} isGameOver={this.state.isGameOver} clickable={this.state.clickable} player={this.state.currentPlayer} gameBoardId={this.props.specificGameBoard.id}/>
           </div>
         </div>
 
@@ -45,9 +50,17 @@ class Grid extends Component {
     const SUBSCRIPTION_QUERY = gql`
         subscription OnlyNeededWithPassingVars {
             gameUpdated {
+                status
+                nextTurn   {
+                    id
+                    status
+                    value
+                    name
+                }
                 cells{
                     id
                     value
+                    partOfWinLine
                 }
                 players {
                     id
@@ -63,11 +76,10 @@ class Grid extends Component {
     }).subscribe({
       next(data) {
         updateCommentsQuery((previousResult, {gameBoardId}) => {
-          console.log('board sub data: ', data)
-          console.log('board sub previous: ', previousResult)
-          // console.log('previous result', previousResult, gameBoardId)
-          previousResult.specificGameBoard.cells=data.gameUpdated.cells;
-          return previousResult;//updating(updatedPost, previousResult);
+          previousResult.specificGameBoard.cells = data.gameUpdated.cells;
+          previousResult.specificGameBoard.nextTurn = data.gameUpdated.nextTurn;
+          previousResult.specificGameBoard.status = data.gameUpdated.status;
+          return previousResult;
         });
       },
       error(err) {
@@ -82,10 +94,15 @@ class Grid extends Component {
       this.subscribe(this.props.updateCommentsQuery);
     }
   }
-
   componentWillReceiveProps(nextProps) {
     if (this.subscriptionObserver) {
       this.subscriptionObserver.unsubscribe();
+    }
+    if (!this.props.loading) {
+      let currentPlayer = this.getPlayer(nextProps.yourPlayerId);
+      let isClickable = currentPlayer.id === nextProps.specificGameBoard.nextTurn.id;
+      let isGameOver = nextProps.specificGameBoard.status === 'Game Over';
+      this.setState({clickable: isClickable, currentPlayer: nextProps.specificGameBoard.nextTurn, isGameOver});
     }
     this.subscribe(nextProps.updateCommentsQuery);
   }
@@ -104,9 +121,17 @@ export default withApollo(graphql(gql`
     query specificGameBoard($gameBoardId: Int!) {
         specificGameBoard(gameBoardId: $gameBoardId) {
             id
-            cells{
+            status
+            nextTurn  {
+                id
+                status
+                value
+                name
+            }
+            cells {
                 id
                 value
+                partOfWinLine
             }
             players {
                 id
