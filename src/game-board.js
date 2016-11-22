@@ -23,8 +23,8 @@ class GameBoard extends Component {
   getAwayPlayerName(id) {
     if (this.props.specificGameBoard) {
       if (id && this.props.specificGameBoard.players.length === 2) {
-        let otherPlayer = reject(propEq('id', id))(this.props.specificGameBoard.players);
-        return otherPlayer.name ? otherPlayer.name : 'Player 2';
+        let otherPlayer = reject(propEq('id', id))(this.props.specificGameBoard.players)[0];
+        return 'Player 2 (' + otherPlayer.value + ')';
       } else {
         return 'Waiting for a player...'
       }
