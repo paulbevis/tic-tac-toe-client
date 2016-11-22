@@ -38,16 +38,17 @@ class GameBoard extends Component {
   }
 
   render() {
-    console.log('Gameboard: render props: ', this.props)
+    // console.log('Gameboard: render props: ', this.props)
     if (this.props.loading) {
       return <div>Loading...</div>;
     } else {
       return (
-        <div style={{display: 'flex', justifyContent: 'center'}}>
+        <div style={{display: 'flex', justifyContent: 'center', flexDirection: 'column'}}>
+          <GameStatus gameBoardId={this.props.gameBoardId} yourPlayerId={this.props.yourPlayerId} />
           <div style={{display: 'flex', justifyContent: 'center'}}>
-            <div style={{display: 'flex', margin: '10px'}}>{this.getHomePlayerName(this.props.yourPlayerId)}</div>
+            <div style={{display: 'flex', margin: '10px', fontSize: '30px', justifyContent: 'center', width: '32%'}}>{this.getHomePlayerName(this.props.yourPlayerId)}</div>
             {this.displayBoard()}
-            <div style={{display: 'flex', margin: '10px'}}>{this.getAwayPlayerName(this.props.yourPlayerId)}</div>
+            <div style={{display: 'flex', margin: '10px', fontSize: '30px', flexGrow: '1', justifyContent: 'center', width: '32%'}}>{this.getAwayPlayerName(this.props.yourPlayerId)}</div>
           </div>
         </div>
       );
