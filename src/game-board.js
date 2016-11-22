@@ -61,10 +61,6 @@ class GameBoard extends Component {
         subscription OnlyNeededWithPassingVars {
             gameJoined {
                 status
-                cells {
-                    id
-                    value
-                }
                 players {
                     id
                     status
@@ -113,12 +109,7 @@ class GameBoard extends Component {
 export default withApollo(graphql(gql`
     query specificGameBoard($gameBoardId: Int!) {
         specificGameBoard(gameBoardId: $gameBoardId) {
-            id
             status
-            cells {
-                id
-                value
-            }
             players {
                 id
                 status
