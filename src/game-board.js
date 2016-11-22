@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import gql from 'graphql-tag';
 import {graphql, withApollo} from 'react-apollo';
-
 import {find, propEq, reject} from 'ramda'
 
 import Grid from './grid'
+import GameStatus from './game-status'
 
 class GameBoard extends Component {
 
