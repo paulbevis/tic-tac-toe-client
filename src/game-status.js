@@ -2,21 +2,16 @@ import React, {Component} from 'react';
 import gql from 'graphql-tag';
 import {graphql, withApollo} from 'react-apollo';
 
-import {find, propEq, reject} from 'ramda'
-
-import Grid from './grid'
-
 class GameStatus extends Component {
 
   displayWinningMessage() {
     const player = this.props.specificGameBoard.players[0].id === this.props.yourPlayerId ? this.props.specificGameBoard.players[0] : this.props.specificGameBoard.players[1]
-    const result = player.status ? ' - You ' + this.props.specificGameBoard.players[0].status:'';
+    const result = player.status ? ' - You ' + this.props.specificGameBoard.players[0].status : '';
     if (this.props.specificGameBoard.status === 'Game Over' && result) {
       return result
     }
   }
   render() {
-    console.log('GameStatus: render props: ', this.props)
     if (this.props.loading) {
       return <div>Loading...</div>;
     } else {
