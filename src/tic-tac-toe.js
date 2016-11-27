@@ -12,7 +12,7 @@ String.prototype.hashCode = function() {
     hash = ((hash << 5) - hash) + chr;
     hash |= 0; // Convert to 32bit integer
   }
-  return hash+Date.now();
+  return hash;
 };
 
 class TicTacToe extends Component {
