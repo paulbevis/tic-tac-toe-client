@@ -5,13 +5,21 @@ import {Client} from 'subscriptions-transport-ws';
 import './App.css';
 import addGraphQLSubscriptions from './subscriptions';
 import TicTacToe from './tic-tac-toe';
-// import Counter from './counter'
+
+let wsEndPoint = 'ws://localhost:8090';
+let graphQlEndPoint = 'http://localhost:8181/graphql';
+
+if (process.env.NODE_ENV === 'production') {
+  wsEndPoint = 'ws://128.199.147.231:8090';
+  graphQlEndPoint = 'http://128.199.147.231:8181/graphql';
+}
+
 class App extends Component {
   constructor(...args) {
     super(...args);
-    const wsClient = new Client('ws://localhost:8090');
+    const wsClient = new Client(wsEndPoint);
     const networkInterface = createNetworkInterface({
-      uri: 'http://localhost:8181/graphql',
+      uri: graphQlEndPoint,
     });
 
     const networkInterfaceWithSubscriptions = addGraphQLSubscriptions(
@@ -28,7 +36,6 @@ class App extends Component {
     return (
       <ApolloProvider client={this.client}>
         <TicTacToe />
-        {/*<Counter />*/}
       </ApolloProvider>
     );
   }
