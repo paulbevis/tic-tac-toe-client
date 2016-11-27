@@ -2,16 +2,15 @@ import React, {Component} from 'react';
 import gql from 'graphql-tag';
 import {graphql, withApollo} from 'react-apollo';
 import {find, propEq, reject} from 'ramda'
-
 import Grid from './grid'
 import GameStatus from './game-status'
 
 class GameBoard extends Component {
 
-  getHomePlayerName(id) {
+  getHomePlayerName(browserId) {
     if (this.props.specificGameBoard) {
-      if (id) {
-        let myPlayer = find(propEq('id', id))(this.props.specificGameBoard.players);
+      if (browserId) {
+        let myPlayer = find(propEq('browserId', browserId))(this.props.specificGameBoard.players);
         let value = ' (' + myPlayer.value + ')'
         return myPlayer.name ? myPlayer.name + value : 'Player 1' + value
       } else {
@@ -20,10 +19,10 @@ class GameBoard extends Component {
     }
   }
 
-  getAwayPlayerName(id) {
+  getAwayPlayerName(browserId) {
     if (this.props.specificGameBoard) {
-      if (id && this.props.specificGameBoard.players.length === 2) {
-        let otherPlayer = reject(propEq('id', id))(this.props.specificGameBoard.players)[0];
+      if (browserId && this.props.specificGameBoard.players.length === 2) {
+        let otherPlayer = reject(propEq('browserId', browserId))(this.props.specificGameBoard.players)[0];
         return 'Player 2 (' + otherPlayer.value + ')';
       } else {
         return 'Waiting for a player...'
@@ -31,24 +30,33 @@ class GameBoard extends Component {
     }
   }
 
-  displayBoard() {
+  displayGrid() {
     if (this.props.specificGameBoard || this.props.specificGameBoard >= 0) {
-      return <Grid gameBoardId={this.props.gameBoardId} yourPlayerId={this.props.yourPlayerId}/>
+      return <Grid specificGameBoard={this.props.specificGameBoard} browserId={this.props.browserId} gameBoardId={this.props.gameBoardId} yourPlayerId={this.props.browserId}/>
     }
   }
 
   render() {
-    // console.log('Gameboard: render props: ', this.props)
+    const playerStyle = {display: 'flex', margin: '10px', fontSize: '30px', justifyContent: 'center', width: '32%'};
+    const homePlayerStyle = Object.assign({}, playerStyle);
+    const opponentPlayerStyle = Object.assign({}, playerStyle);
     if (this.props.loading) {
       return <div>Loading...</div>;
     } else {
+      if (this.props.specificGameBoard.status === 'Playing') {
+        if (this.props.specificGameBoard.nextTurn.browserId === this.props.browserId) {
+          homePlayerStyle.color = 'green';
+        } else {
+          opponentPlayerStyle.color = 'green';
+        }
+      }
       return (
         <div style={{display: 'flex', justifyContent: 'center', flexDirection: 'column'}}>
-          <GameStatus gameBoardId={this.props.gameBoardId} yourPlayerId={this.props.yourPlayerId} />
+          <GameStatus specificGameBoard={this.props.specificGameBoard} gameBoardId={this.props.gameBoardId} browserId={this.props.browserId}/>
           <div style={{display: 'flex', justifyContent: 'center'}}>
-            <div style={{display: 'flex', margin: '10px', fontSize: '30px', justifyContent: 'center', width: '32%'}}>{this.getHomePlayerName(this.props.yourPlayerId)}</div>
-            {this.displayBoard()}
-            <div style={{display: 'flex', margin: '10px', fontSize: '30px', flexGrow: '1', justifyContent: 'center', width: '32%'}}>{this.getAwayPlayerName(this.props.yourPlayerId)}</div>
+            <div style={homePlayerStyle}>{this.getHomePlayerName(this.props.browserId)}</div>
+            {this.displayGrid()}
+            <div style={opponentPlayerStyle}>{this.getAwayPlayerName(this.props.browserId)}</div>
           </div>
         </div>
       );
@@ -59,13 +67,26 @@ class GameBoard extends Component {
   subscribe(updateCommentsQuery) {
     const SUBSCRIPTION_QUERY = gql`
         subscription OnlyNeededWithPassingVars {
-            gameJoined {
+            gameUpdated {
                 status
                 players {
                     id
                     status
                     value
                     name
+                    browserId
+                }
+                nextTurn   {
+                    id
+                    status
+                    value
+                    name
+                    browserId
+                }
+                cells {
+                    id
+                    value
+                    partOfWinLine
                 }
             }
         }`;
@@ -75,8 +96,10 @@ class GameBoard extends Component {
     }).subscribe({
       next(data) {
         updateCommentsQuery((previousResult) => {
-          previousResult.specificGameBoard.players = data.gameJoined.players;
-          previousResult.specificGameBoard.status = data.gameJoined.status;
+          previousResult.specificGameBoard.players = data.gameUpdated.players;
+          previousResult.specificGameBoard.status = data.gameUpdated.status;
+          previousResult.specificGameBoard.cells = data.gameUpdated.cells;
+          previousResult.specificGameBoard.nextTurn = data.gameUpdated.nextTurn;
           return previousResult
         });
       },
@@ -109,12 +132,26 @@ class GameBoard extends Component {
 export default withApollo(graphql(gql`
     query specificGameBoard($gameBoardId: Int!) {
         specificGameBoard(gameBoardId: $gameBoardId) {
+            id
             status
             players {
                 id
                 status
                 value
                 name
+                browserId
+            }
+            nextTurn   {
+                id
+                status
+                value
+                name
+                browserId
+            }
+            cells {
+                id
+                value
+                partOfWinLine
             }
         }
     }`, {
