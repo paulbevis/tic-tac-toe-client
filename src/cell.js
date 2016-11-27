@@ -2,8 +2,6 @@ import React from 'react';
 import gql from 'graphql-tag';
 import {graphql} from 'react-apollo';
 
-// A mutation is made available on a callback called `mutate`
-// Other props of the wrapping component are passed through.
 function Cell({mutate, cell, clickable, player, gameBoardId, isGameOver}) {
   let styling = {
     background: cell.partOfWinLine ? 'red' : 'lightGrey',
@@ -16,7 +14,7 @@ function Cell({mutate, cell, clickable, player, gameBoardId, isGameOver}) {
     fontSize: '40px',
     cursor: 'pointer'
   };
-  // console.log('Cell: ',isGameOver, cell,clickable,player,gameBoardId)
+
   return (
     <div style={styling} onClick={() => {
       if (!cell.value && clickable && !isGameOver) {
