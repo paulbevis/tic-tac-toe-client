@@ -31,7 +31,7 @@ class TicTacToe extends Component {
 
   displayGameBoard() {
     if (this.state.gameBoardId >= 0) {
-      return <GameBoard yourPlayerId={this.state.playerId} gameBoardId={this.state.gameBoardId}/>
+      return <GameBoard browserId={this.props.browserId} yourPlayerId={this.state.playerId} gameBoardId={this.state.gameBoardId}/>
     }
   }
 

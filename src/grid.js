@@ -11,14 +11,14 @@ class Grid extends Component {
     super(props);
     this.state = {'clickable': false};
   }
-  getPlayer(id) {
-    if (id) {
-      return find(propEq('id', id))(this.props.specificGameBoard.players)
+
+  getPlayer(browserId) {
+    if (browserId) {
+      return find(propEq('browserId', browserId))(this.props.specificGameBoard.players)
     }
   }
 
   render() {
-    console.log('grid: state: ',this.state, this.props) ;
     if (this.props.loading) {
       return <div>Loading...</div>;
     } else {
@@ -45,102 +45,14 @@ class Grid extends Component {
     }
   }
 
-
-  subscribe(updateCommentsQuery) {
-    const SUBSCRIPTION_QUERY = gql`
-        subscription OnlyNeededWithPassingVars {
-            gameUpdated {
-                status
-                nextTurn   {
-                    id
-                    status
-                    value
-                    name
-                }
-                cells{
-                    id
-                    value
-                    partOfWinLine
-                }
-                players {
-                    id
-                    status
-                    value
-                }
-            }
-        }`;
-
-    this.subscriptionObserver = this.props.client.subscribe({
-      query: SUBSCRIPTION_QUERY,
-      variables: {"gameBoardId": 0}
-    }).subscribe({
-      next(data) {
-        updateCommentsQuery((previousResult, {gameBoardId}) => {
-          previousResult.specificGameBoard.cells = data.gameUpdated.cells;
-          previousResult.specificGameBoard.nextTurn = data.gameUpdated.nextTurn;
-          previousResult.specificGameBoard.status = data.gameUpdated.status;
-          return previousResult;
-        });
-      },
-      error(err) {
-        console.error('err', err);
-      },
-    });
-  }
-
-
-  componentDidMount() {
-    if (this.props.loading === false) {
-      this.subscribe(this.props.updateCommentsQuery);
-    }
-  }
   componentWillReceiveProps(nextProps) {
-    if (this.subscriptionObserver) {
-      this.subscriptionObserver.unsubscribe();
-    }
     if (!this.props.loading) {
-      let currentPlayer = this.getPlayer(nextProps.yourPlayerId);
-      let isClickable = currentPlayer.id === nextProps.specificGameBoard.nextTurn.id;
+      let currentPlayer = this.getPlayer(nextProps.browserId);
+      let isClickable = (currentPlayer.browserId === nextProps.specificGameBoard.nextTurn.browserId);
       let isGameOver = nextProps.specificGameBoard.status === 'Game Over';
-      this.setState({clickable: isClickable, currentPlayer: nextProps.specificGameBoard.nextTurn, isGameOver});
-    }
-    this.subscribe(nextProps.updateCommentsQuery);
-  }
-
-  componentWillUnmount() {
-    if (this.subscriptionObserver) {
-      this.subscriptionObserver.unsubscribe();
+      var newState = {clickable: isClickable, currentPlayer: nextProps.specificGameBoard.nextTurn, isGameOver};
+      this.setState(newState);
     }
   }
-
-
 }
-
-
-export default withApollo(graphql(gql`
-    query specificGameBoard($gameBoardId: Int!) {
-        specificGameBoard(gameBoardId: $gameBoardId) {
-            id
-            status
-            nextTurn  {
-                id
-                status
-                value
-                name
-            }
-            cells {
-                id
-                value
-                partOfWinLine
-            }
-            players {
-                id
-                status
-                value
-            }
-        }
-    }`, {
-  props({data: {loading, specificGameBoard, updateQuery}}) {
-    return {loading, specificGameBoard, updateCommentsQuery: updateQuery};
-  }
-})(Grid));
+export default Grid
