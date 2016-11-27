@@ -45,7 +45,7 @@ class TicTacToe extends Component {
 
   displayStartGame() {
     if (this.state.playerName.length !== 0) {
-      return <StartGame onJoined={this.onJoined} playerName={this.state.playerName} playerId={this.state.playerId}/>
+      return <StartGame onJoined={this.onJoined} browserId={this.props.browserId} playerName={this.state.playerName} playerId={this.state.playerId}/>
     }
   }
 
