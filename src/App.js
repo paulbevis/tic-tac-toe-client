@@ -30,12 +30,18 @@ class App extends Component {
     this.client = new ApolloClient({
       networkInterface: networkInterfaceWithSubscriptions,
     });
+
+    this.browserId = localStorage.getItem('browserId');
+    if (!this.browserId) {
+      this.browserId = Date.now();
+      localStorage.setItem('browserId', this.browserId);
+    }
   }
 
   render() {
     return (
       <ApolloProvider client={this.client}>
-        <TicTacToe />
+        <TicTacToe browserId={this.browserId}/>
       </ApolloProvider>
     );
   }
