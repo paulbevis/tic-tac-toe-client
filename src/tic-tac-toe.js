@@ -23,6 +23,7 @@ class TicTacToe extends Component {
     this.onJoined = this.onJoined.bind(this);
     this.onPlayerRegistered = this.onPlayerRegistered.bind(this);
     this.onPlayerNameUpdate = this.onPlayerNameUpdate.bind(this);
+    console.log('BowserID: ',this.props.browserId);
   }
 
   onJoined(gameBoardId) {
