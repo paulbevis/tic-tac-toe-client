@@ -8,14 +8,13 @@ import GameStatus from './game-status'
 class GameBoard extends Component {
 
   getHomePlayerName(browserId) {
-    if (this.props.specificGameBoard) {
-      if (browserId) {
-        let myPlayer = find(propEq('browserId', browserId))(this.props.specificGameBoard.players);
-        let value = ' (' + myPlayer.value + ')'
-        return myPlayer.name ? myPlayer.name + value : 'Player 1' + value
-      } else {
-        return 'Waiting for a player...'
-      }
+    if (this.props.specificGameBoard && browserId) {
+      console.log('getHomePlayerName: players: ', this.props.specificGameBoard.players);
+      let myPlayer = find(propEq('browserId', browserId))(this.props.specificGameBoard.players);
+      let value = ' (' + myPlayer.value + ')'
+      return myPlayer.name ? myPlayer.name + value : 'Player 1' + value
+    } else {
+      return 'Waiting for a player...'
     }
   }
 
@@ -64,10 +63,11 @@ class GameBoard extends Component {
   }
 
 
-  subscribe(updateCommentsQuery) {
+  subscribe(gameBoardId, updateCommentsQuery) {
     const SUBSCRIPTION_QUERY = gql`
-        subscription OnlyNeededWithPassingVars {
-            gameUpdated {
+        subscription gameUpdated($gameBoardId: Int!) {
+            gameUpdated(gameBoardId: $gameBoardId) {
+                id
                 status
                 players {
                     id
@@ -92,10 +92,13 @@ class GameBoard extends Component {
         }`;
 
     this.subscriptionObserver = this.props.client.subscribe({
-      query: SUBSCRIPTION_QUERY
+      query: SUBSCRIPTION_QUERY,
+      variables: {gameBoardId},
+      operationName: 'gameUpdated'
     }).subscribe({
       next(data) {
         updateCommentsQuery((previousResult) => {
+          console.log('id:: prev/now ', previousResult.specificGameBoard.id, data.gameUpdated.id)
           previousResult.specificGameBoard.players = data.gameUpdated.players;
           previousResult.specificGameBoard.status = data.gameUpdated.status;
           previousResult.specificGameBoard.cells = data.gameUpdated.cells;
@@ -111,7 +114,7 @@ class GameBoard extends Component {
 
   componentDidMount() {
     if (this.props.loading === false) {
-      this.subscribe(this.props.updateCommentsQuery);
+      this.subscribe(0, this.props.updateCommentsQuery);
     }
   }
 
@@ -119,7 +122,7 @@ class GameBoard extends Component {
     if (this.subscriptionObserver) {
       this.subscriptionObserver.unsubscribe();
     }
-    this.subscribe(nextProps.updateCommentsQuery);
+    this.subscribe(0, nextProps.updateCommentsQuery);
   }
 
   componentWillUnmount() {
