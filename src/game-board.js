@@ -9,7 +9,7 @@ class GameBoard extends Component {
 
   getHomePlayerName(browserId) {
     if (this.props.specificGameBoard && browserId) {
-      console.log('getHomePlayerName: players: ', this.props.specificGameBoard.players);
+      // console.log('getHomePlayerName: players: ', this.props.specificGameBoard.players);
       let myPlayer = find(propEq('browserId', browserId))(this.props.specificGameBoard.players);
       let value = ' (' + myPlayer.value + ')'
       return myPlayer.name ? myPlayer.name + value : 'Player 1' + value
