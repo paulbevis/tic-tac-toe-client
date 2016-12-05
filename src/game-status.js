@@ -4,7 +4,7 @@ class GameStatus extends Component {
 
   displayWinningMessage() {
     const player = this.props.specificGameBoard.players[0].browserId === this.props.browserId ? this.props.specificGameBoard.players[0] : this.props.specificGameBoard.players[1]
-    return player.status ? ' - You ' + player.status : '';
+    return player.endStatus ? ' - You ' + player.endStatus : '';
   }
 
   render() {
