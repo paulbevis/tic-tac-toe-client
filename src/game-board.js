@@ -96,7 +96,7 @@ class GameBoard extends Component {
 
     this.subscriptionObserver = this.props.client.subscribe({
       query: SUBSCRIPTION_QUERY,
-      variables: {gameBoardId},
+      variables: {gameBoardId:this.props.gameBoardId},
       operationName: 'gameUpdated'
     }).subscribe({
       next(data) {
@@ -117,7 +117,7 @@ class GameBoard extends Component {
 
   componentDidMount() {
     if (this.props.loading === false) {
-      this.subscribe(0, this.props.updateCommentsQuery);
+      this.subscribe( this.props.updateCommentsQuery);
     }
   }
 
@@ -125,7 +125,7 @@ class GameBoard extends Component {
     if (this.subscriptionObserver) {
       this.subscriptionObserver.unsubscribe();
     }
-    this.subscribe(0, nextProps.updateCommentsQuery);
+    this.subscribe( nextProps.updateCommentsQuery);
   }
 
   componentWillUnmount() {
