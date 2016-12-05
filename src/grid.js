@@ -47,7 +47,7 @@ class Grid extends Component {
     if (!this.props.loading) {
       let currentPlayer = this.getPlayer(nextProps.browserId);
       let isClickable = (currentPlayer.browserId === nextProps.specificGameBoard.nextTurn.browserId);
-      let isGameOver = nextProps.specificGameBoard.status === 'Game Over';
+      let isGameOver = nextProps.specificGameBoard.status.code === 'GAME_OVER';
       var newState = {clickable: isClickable, currentPlayer: nextProps.specificGameBoard.nextTurn, isGameOver};
       this.setState(newState);
     }

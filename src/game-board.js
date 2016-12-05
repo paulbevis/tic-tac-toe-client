@@ -42,7 +42,7 @@ class GameBoard extends Component {
     if (this.props.loading) {
       return <div>Loading...</div>;
     } else {
-      if (this.props.specificGameBoard.status === 'Playing') {
+      if (this.props.specificGameBoard.status.code === 'PLAYING') {
         if (this.props.specificGameBoard.nextTurn.browserId === this.props.browserId) {
           homePlayerStyle.color = 'green';
         } else {
@@ -63,22 +63,25 @@ class GameBoard extends Component {
   }
 
 
-  subscribe(gameBoardId, updateCommentsQuery) {
+  subscribe(updateCommentsQuery) {
     const SUBSCRIPTION_QUERY = gql`
         subscription gameUpdated($gameBoardId: Int!) {
             gameUpdated(gameBoardId: $gameBoardId) {
                 id
-                status
+                status {
+                    code
+                    description
+                }
                 players {
                     id
-                    status
+                    endStatus
                     value
                     name
                     browserId
                 }
                 nextTurn   {
                     id
-                    status
+                    endStatus
                     value
                     name
                     browserId
@@ -136,17 +139,20 @@ export default withApollo(graphql(gql`
     query specificGameBoard($gameBoardId: Int!) {
         specificGameBoard(gameBoardId: $gameBoardId) {
             id
-            status
+            status {
+                code
+                description
+            }
             players {
                 id
-                status
+                endStatus
                 value
                 name
                 browserId
             }
             nextTurn   {
                 id
-                status
+                endStatus
                 value
                 name
                 browserId

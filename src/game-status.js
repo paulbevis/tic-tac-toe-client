@@ -10,7 +10,7 @@ class GameStatus extends Component {
   render() {
     return (
       <div style={{display: 'flex', justifyContent: 'center', fontSize: '40px', background: 'lightgray', margin: '15px 0'}}>
-        <div style={{display: 'flex'}}>{this.props.specificGameBoard.status} {this.displayWinningMessage()}</div>
+        <div style={{display: 'flex'}}>{this.props.specificGameBoard.status.description} {this.displayWinningMessage()}</div>
       </div>
     );
   }
