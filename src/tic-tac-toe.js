@@ -23,16 +23,37 @@ class TicTacToe extends Component {
     this.onJoined = this.onJoined.bind(this);
     this.onPlayerRegistered = this.onPlayerRegistered.bind(this);
     this.onPlayerNameUpdate = this.onPlayerNameUpdate.bind(this);
-    console.log('BowserID: ',this.props.browserId);
+    this.onGameEnded = this.onGameEnded.bind(this);
+  }
+
+  onGameEnded() {
+    console.log('onGameEnded')
+    this.setState({
+      gameBoardId: this.state.gameBoardId,
+      registerUserNow: true,
+      newGameCreated: true,
+      playerName: this.state.playerName,
+      gameInProgress: false
+    })
   }
 
   onJoined(gameBoardId) {
-    this.setState({gameBoardId: gameBoardId, registerUserNow: true, newGameCreated: true, playerName: this.state.playerName})
+    console.log('onGamestarted')
+    this.setState({
+      gameBoardId: gameBoardId,
+      registerUserNow: true,
+      newGameCreated: true,
+      playerName: this.state.playerName,
+      gameInProgress: true
+    })
   }
 
   displayGameBoard() {
     if (this.state.gameBoardId >= 0) {
-      return <GameBoard browserId={this.props.browserId} yourPlayerId={this.state.playerId} gameBoardId={this.state.gameBoardId}/>
+      return <GameBoard browserId={this.props.browserId}
+                        yourPlayerId={this.state.playerId}
+                        gameBoardId={this.state.gameBoardId}
+                        onGameEnded={this.onGameEnded}/>
     }
   }
 
@@ -46,7 +67,11 @@ class TicTacToe extends Component {
 
   displayStartGame() {
     if (this.state.playerName.length !== 0) {
-      return <StartGame onJoined={this.onJoined} browserId={this.props.browserId} playerName={this.state.playerName} playerId={this.state.playerId}/>
+      return <StartGame gameInProgress={this.state.gameInProgress}
+                        onJoined={this.onJoined}
+                        browserId={this.props.browserId}
+                        playerName={this.state.playerName}
+                        playerId={this.state.playerId}/>
     }
   }
 
