@@ -50,7 +50,9 @@ class GameBoard extends Component {
       }
       return (
         <div style={{display: 'flex', justifyContent: 'center', flexDirection: 'column'}}>
-          <GameStatus specificGameBoard={this.props.specificGameBoard} gameBoardId={this.props.gameBoardId} browserId={this.props.browserId}/>
+          <GameStatus specificGameBoard={this.props.specificGameBoard}
+                      gameBoardId={this.props.gameBoardId}
+                      browserId={this.props.browserId}/>
           <div style={{display: 'flex', justifyContent: 'center'}}>
             <div style={homePlayerStyle}>{this.getHomePlayerName(this.props.browserId)}</div>
             {this.displayGrid()}
@@ -95,7 +97,7 @@ class GameBoard extends Component {
 
     this.subscriptionObserver = this.props.client.subscribe({
       query: SUBSCRIPTION_QUERY,
-      variables: {gameBoardId:this.props.gameBoardId},
+      variables: {gameBoardId: this.props.gameBoardId},
       operationName: 'gameUpdated'
     }).subscribe({
       next(data) {
@@ -115,15 +117,19 @@ class GameBoard extends Component {
 
   componentDidMount() {
     if (this.props.loading === false) {
-      this.subscribe( this.props.updateCommentsQuery);
+      this.subscribe(this.props.updateCommentsQuery);
     }
   }
 
   componentWillReceiveProps(nextProps) {
+    if (this.props.specificGameBoard && this.props.specificGameBoard.status.code !== nextProps.specificGameBoard.status.code &&
+      (nextProps.specificGameBoard.status.code === 'GAME_OVER' || nextProps.specificGameBoard.status.code === 'GAME_ABANDONED')) {
+      this.props.onGameEnded();
+    }
     if (this.subscriptionObserver) {
       this.subscriptionObserver.unsubscribe();
     }
-    this.subscribe( nextProps.updateCommentsQuery);
+    this.subscribe(nextProps.updateCommentsQuery);
   }
 
   componentWillUnmount() {
