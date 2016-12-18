@@ -2,17 +2,13 @@ import React from 'react';
 import gql from 'graphql-tag';
 import {graphql} from 'react-apollo';
 
-// A mutation is made available on a callback called `mutate`
-// Other props of the wrapping component are passed through.
-function StartGame({mutate, onJoined, browserId, playerName, playerId}) {
-
-
+function StartGame({mutate, gameInProgress, onJoined, browserId, playerName, playerId}) {
   return (
-    <button style={{fontSize: '20px', margin: '10px'}} onClick={() => {
+    <button disabled={gameInProgress ? 'disabled' : ''} style={{fontSize: '20px', margin: '10px'}} onClick={() => {
       let promise = mutate({variables: {browserId, playerId, playerName}});
-      promise.then((data)=>onJoined(data.data.joinGame));
+      promise.then((data) => onJoined(data.data.joinGame));
     }}>
-      Start Game
+      Start New Game
     </button>
   )
 }
