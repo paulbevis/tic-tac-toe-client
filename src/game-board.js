@@ -9,7 +9,6 @@ class GameBoard extends Component {
 
   getHomePlayerName(browserId) {
     if (this.props.specificGameBoard && browserId) {
-      // console.log('getHomePlayerName: players: ', this.props.specificGameBoard.players);
       let myPlayer = find(propEq('browserId', browserId))(this.props.specificGameBoard.players);
       let value = ' (' + myPlayer.value + ')'
       return myPlayer.name ? myPlayer.name + value : 'Player 1' + value
@@ -101,7 +100,6 @@ class GameBoard extends Component {
     }).subscribe({
       next(data) {
         updateCommentsQuery((previousResult) => {
-          console.log('id:: prev/now ', previousResult.specificGameBoard.id, data.gameUpdated.id)
           previousResult.specificGameBoard.players = data.gameUpdated.players;
           previousResult.specificGameBoard.status = data.gameUpdated.status;
           previousResult.specificGameBoard.cells = data.gameUpdated.cells;
